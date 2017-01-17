@@ -1,0 +1,34 @@
+ext {
+// Android Config
+// --------------------------------------------------------------------------------
+    compileSdkVersion = 24 // SDK编译版本
+    buildToolsVersion = '24.0.3' // 构建工具版本
+    minSdkVersion = 19 // 最小SDK版本
+    targetSdkVersion = 24 // 目标SDK版本
+
+    versionCode = 100 // 版本号由版本名映射，主版本号 * 10000 + 子版本号 * 100 + 修正版本号，例如1.2.10 -> 10210
+    versionName = '0.1.0' // 版本名采用GNU风格，主版本号.子版本号.修正版本号，例如1.2.10
+
+// Artifactory
+// --------------------------------------------------------------------------------
+    contextUrl = 'http://artifactory.fcbox.com:8081/artifactory/'
+    groupId = 'com.fcbox.android'
+    artifactId = 'rocket'
+// Libraries
+// --------------------------------------------------------------------------------
+    supportVersion = '24.2.1'
+    appcompatv7Version='24.2.1'
+    sweetalertVersion='1.3'
+    rxJavaVersion = '1.2.3'
+    rxAndroidVersion = '1.2.1'
+
+// Modules
+// --------------------------------------------------------------------------------
+    libraryModule = [
+            supportAnnotation: "com.android.support:support-annotations:${supportVersion}",
+            appcompatv7      : "com.android.support:appcompat-v7:${appcompatv7Version}",
+            sweetalert       : "cn.pedant.sweetalert:library:${sweetalertVersion}",
+            rxjava               : "io.reactivex:rxjava:${rxJavaVersion}",
+            rxandroid            : "io.reactivex:rxandroid:${rxAndroidVersion}"
+    ]
+}
