@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -19,17 +20,22 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
     /**
      * 返回聊天界面控制 .
      */
-    private final AtomicBoolean backChatBoolean = new AtomicBoolean(false);
+    private final AtomicBoolean firstEntryBoolean = new AtomicBoolean(false);
 
     /**
      * 处理当前的红包position .
      */
-    private int currentPosition = -1;
+    private int currentIndex = 0;
+
+    private int totalCount = 0;
 
     /**
      * 当前红包的节点信息 .
      */
-    private List<AccessibilityNodeInfo> envelopeNodeInfos;
+//    private List<AccessibilityNodeInfo> envelopeNodeInfos;
+    @Override
+    public void onInterrupt() {
+    }
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
@@ -43,10 +49,12 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
                 String clsName = event.getClassName().toString();
                 LoggWrap.i("窗口发生变法的事件类 ： " + clsName);
                 if ("com.tencent.mm.ui.LauncherUI".equals(clsName)) {
-                    //点击红包
-                    if (!backChatBoolean.get()) {
-                        initEnvelopeNodeIfo();
+                    if (firstEntryBoolean.get()) {
+                        //说明是从通知栏进入到Chat页面 初始化参数
+                        firstEntryBoolean.set(false);
+                        initData();
                     }
+                    handNextEnvelope();
                 }
                 if ("com.tencent.mm.plugin.luckymoney.ui.LuckyMoneyReceiveUI".equals(clsName)) {
                     //打开红包
@@ -56,7 +64,77 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
                     moneyDetailClick();
                 }
                 break;
+        }
+    }
 
+    /**
+     * 检测红包是否已处理完成
+     */
+    private boolean checkHandleEnvelopeComplete() {
+        return currentIndex == 0;
+    }
+
+    private void initData() {
+        List<AccessibilityNodeInfo> nodeInfos = genEnvelopeNodeInfos();
+        if (nodeInfos != null) {
+            totalCount = nodeInfos.size();
+            currentIndex = totalCount; //从最后一个红包开始处理 .
+            LoggWrap.i("总共有" + totalCount + "个红包需要处理 .");
+        }
+    }
+
+    @Nullable
+    private List<AccessibilityNodeInfo> genEnvelopeNodeInfos() {
+        AccessibilityNodeInfo accessibilityNodeInfo = getRootInActiveWindow();
+        if (accessibilityNodeInfo != null) {
+            // TODO: 2017/1/18 snamon 这里有一个问题，假如此红包已抢，我们也要模拟点击一次，不过不会联网，性能影响不大，是否可优化？
+            List<AccessibilityNodeInfo> envelopeNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(
+                    "com.tencent.mm:id/a48");
+            accessibilityNodeInfo.recycle();
+            return envelopeNodeInfos;
+        }
+        return null;
+    }
+
+    /**
+     * 处理下一个红包 .
+     */
+    private void handNextEnvelope() {
+
+        if (!checkHandleEnvelopeComplete()) {
+            --currentIndex;
+            LoggWrap.i("处理" + (currentIndex + 1) + "号红包 .");
+            //重新获取红包节点
+            List<AccessibilityNodeInfo> nodeInfos = genEnvelopeNodeInfos();
+            if (nodeInfos != null) {
+                if (nodeInfos.size() == totalCount) {
+                    AccessibilityNodeInfo envelopeNodeInfo = nodeInfos.get(currentIndex);
+                    envelopeNodeInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                } else {
+                    //防止在拆多个红包，红包节点个数改变 . 需重新开始遍历
+                    LoggWrap.i("红包节点个数已改变 .");
+                    initData();
+                    handNextEnvelope();
+                }
+            }
+        }else {
+            LoggWrap.i("红包处理完成 .");
+        }
+    }
+
+    /**
+     * 模拟点击"开"红包 .
+     */
+    private void moneyReceiveClick() {
+        AccessibilityNodeInfo accessibilityNodeInfo = getRootInActiveWindow();
+        if (accessibilityNodeInfo != null) {
+            List<AccessibilityNodeInfo> accessibilityNodeInfos =
+                    accessibilityNodeInfo.findAccessibilityNodeInfosByViewId("com.tencent.mm:id/be_");
+            accessibilityNodeInfo.recycle();
+            for (AccessibilityNodeInfo ani : accessibilityNodeInfos) {
+                ani.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                LoggWrap.i("模拟拆红包///");
+            }
         }
     }
 
@@ -83,75 +161,13 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
             accessibilityNodeInfo.recycle();
             if (backNodeInfos != null && backNodeInfos.size() != 0) {
                 backNodeInfos.get(0).performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                backChatBoolean.set(true);
                 LoggWrap.i("关闭红包详情页面");
-                handNextEnvelope();
             } else {
                 LoggWrap.e("没找到关闭按钮.");
             }
         }
-
-
     }
 
-
-    /**
-     * 初始化红包节点信息 .
-     */
-    private void initEnvelopeNodeIfo() {
-
-        AccessibilityNodeInfo accessibilityNodeInfo = getRootInActiveWindow();
-        if (accessibilityNodeInfo != null) {
-            // TODO: 2017/1/18 snamon 这里有一个问题，假如此红包已抢，我们也要模拟点击一次，不过不会联网，性能影响不大，是否可优化？
-            envelopeNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId("com.tencent.mm:id/a48");
-            accessibilityNodeInfo.recycle();
-            if (envelopeNodeInfos != null) {
-                LoggWrap.i("待处理红包数：" + envelopeNodeInfos.size());
-            }
-            handNextEnvelope();
-        }
-
-    }
-
-    /**
-     * 处理下一个红包 .
-     */
-    private void handNextEnvelope() {
-        currentPosition++;
-        if (envelopeNodeInfos != null && currentPosition < envelopeNodeInfos.size()) {
-            LoggWrap.i("处理第" +currentPosition +"个红包 .");
-            AccessibilityNodeInfo envelopeNodeInfo = envelopeNodeInfos.get(currentPosition);
-            envelopeNodeInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-        } else {
-            //数据复位
-            currentPosition = -1;
-            envelopeNodeInfos = null;
-            backChatBoolean.set(false);
-        }
-
-    }
-
-    /**
-     * 模拟点击"开"红包 .
-     */
-    private void moneyReceiveClick() {
-        AccessibilityNodeInfo accessibilityNodeInfo = getRootInActiveWindow();
-        if (accessibilityNodeInfo != null) {
-            List<AccessibilityNodeInfo> accessibilityNodeInfos =
-                    accessibilityNodeInfo.findAccessibilityNodeInfosByViewId("com.tencent.mm:id/be_");
-            LoggWrap.i("拆红包数：" + accessibilityNodeInfos.size());
-            accessibilityNodeInfo.recycle();
-            for (AccessibilityNodeInfo ani : accessibilityNodeInfos) {
-                ani.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                LoggWrap.i("模拟拆红包///");
-            }
-        }
-    }
-
-    @Override
-    public void onInterrupt() {
-
-    }
 
     private void handleNotification(AccessibilityEvent event) {
         Parcelable data = event.getParcelableData();
@@ -168,6 +184,7 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
                 PendingIntent contentIntent = notification.contentIntent;
                 if (contentIntent != null) {
                     try {
+                        firstEntryBoolean.set(true); //说明第一次点击这个人的红包界面
                         contentIntent.send();
                     } catch (PendingIntent.CanceledException e) {
                         e.printStackTrace();
