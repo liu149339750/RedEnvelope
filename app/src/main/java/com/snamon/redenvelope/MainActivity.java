@@ -42,8 +42,8 @@ public class MainActivity extends AppCompatActivity {
                     });
             mSweetAlertDialog.show();
         }
-        findViewById(R.id.btn_mock_click)
-                .setOnClickListener(v -> delaySendNotification());
+//        findViewById(R.id.btn_mock_click)
+//                .setOnClickListener(v -> delaySendNotification());
     }
 
     private void delaySendNotification() {
