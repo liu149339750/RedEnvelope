@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <RadioGroup
+        android:id="@+id/dot_group"
+        android:layout_width="wrap_content"
+        android:layout_height="100dip"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/radiobutton1"
+            android:layout_width="10dip"
+            android:layout_height="10dip"
+            android:background="@drawable/user_guide_dot_selector"
+            android:button="@null"
+            android:checked="true"
+            android:clickable="false"
+            android:enabled="false" />
+
+        <RadioButton
+            android:id="@+id/radiobutton2"
+            android:layout_width="10dip"
+            android:layout_height="10dip"
+            android:layout_marginLeft="10dip"
+            android:layout_marginRight="10dip"
+            android:background="@drawable/user_guide_dot_selector"
+            android:button="@null"
+            android:clickable="false"
+            android:enabled="false" />
+
+        <RadioButton
+            android:id="@+id/radiobutton3"
+            android:layout_width="10dip"
+            android:layout_height="10dip"
+            android:background="@drawable/user_guide_dot_selector"
+            android:button="@null"
+            android:clickable="false"
+            android:enabled="false" />
+    </RadioGroup>
+</RelativeLayout>

@@ -1,4 +1,4 @@
-package com.snamon.redenvelope;
+package com.snamon.redenvelope.ui;
 
 import android.util.Log;
 

@@ -1,11 +1,16 @@
-package com.snamon.redenvelope;
+package com.snamon.redenvelope.utils;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
+
+import com.snamon.redenvelope.ui.LoggWrap;
 
 import java.util.List;
 
@@ -61,6 +66,15 @@ public class SystemUtil {
         }
 
         return false;
+    }
+
+    public static String getTopActivityClassName(Context context) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> runningTasks = manager.getRunningTasks(1);
+        ActivityManager.RunningTaskInfo cinfo = runningTasks.get(0);
+        ComponentName component = cinfo.topActivity;
+        Log.e("current activity is ", component.getClassName());
+        return component.getClassName();
     }
 
 

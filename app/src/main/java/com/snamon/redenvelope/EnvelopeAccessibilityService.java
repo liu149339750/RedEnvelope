@@ -5,10 +5,12 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Toast;
+
+import com.snamon.redenvelope.ui.LoggWrap;
+import com.snamon.redenvelope.utils.Log;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,6 +31,14 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
      * 红包节点资源id
      */
     public static final String ID_CHAT_REDPACK_VIEW = "com.tencent.mm:id/a48";
+    /**
+     * 红包信封窗口模样的页面 开按钮
+     */
+    static final String ID_OPEN_ENVELOPE_VIEW = "com.tencent.mm:id/be_";
+    /**
+     * 取消实名认证 按钮id
+     */
+    static final String ID_CANCEL_SMRZ_VIEW = "com.tencent.mm:id/a_x";
     /**
      * 微信的包名
      */
@@ -55,11 +65,6 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
     static final String ACTIVITY_NAME_WX_NEED_SMRZ_TIP = "com.tencent.mm.ui.base.h";
 
     /**
-     * 取消实名认证 按钮id
-     */
-    static final String ID_CANCEL_SMRZ_VIEW = "com.tencent.mm:id/a_x";
-
-    /**
      * 返回聊天界面控制 .
      */
     private final AtomicBoolean firstEntryBoolean = new AtomicBoolean(false);
@@ -72,10 +77,6 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
     private long lastNotifytime;
     private String lastWxActivityName;
 
-    /**
-     * 当前红包的节点信息 .
-     */
-//    private List<AccessibilityNodeInfo> envelopeNodeInfos;
     @Override
     public void onInterrupt() {
         Toast.makeText(this, "中断抢红包服务", Toast.LENGTH_SHORT).show();
@@ -179,7 +180,7 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
         AccessibilityNodeInfo accessibilityNodeInfo = getRootInActiveWindow();
         if (accessibilityNodeInfo != null) {
             // TODO: 2017/1/18 snamon 这里有一个问题，假如此红包已抢，我们也要模拟点击一次，不过不会联网，性能影响不大，是否可优化？
-            List<AccessibilityNodeInfo> envelopeNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId("com.tencent.mm:id/a48");
+            List<AccessibilityNodeInfo> envelopeNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(ID_CHAT_REDPACK_VIEW);
             if (envelopeNodeInfos == null || envelopeNodeInfos.size() == 0) {
                 Log.e(TAG, "非最新微信版本，尝试获取ver6.3.27版本的 红包借点集合");
                 envelopeNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId("com.tencent.mm:id/a3p"); //ver 6.3.27
@@ -224,7 +225,7 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
     private void moneyReceiveClick() {
         AccessibilityNodeInfo accessibilityNodeInfo = getRootInActiveWindow();
         if (accessibilityNodeInfo != null) {
-            List<AccessibilityNodeInfo> accessibilityNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId("com.tencent.mm:id/be_");
+            List<AccessibilityNodeInfo> accessibilityNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(ID_OPEN_ENVELOPE_VIEW);
             if (accessibilityNodeInfos == null || accessibilityNodeInfos.size() == 0) {
                 accessibilityNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId("com.tencent.mm:id/bdg"); //ver 6.3.27
             }

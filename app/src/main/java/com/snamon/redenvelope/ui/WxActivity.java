@@ -1,8 +1,10 @@
-package com.snamon.redenvelope;
+package com.snamon.redenvelope.ui;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
+
+import com.snamon.redenvelope.R;
 
 public class WxActivity extends AppCompatActivity {
 
