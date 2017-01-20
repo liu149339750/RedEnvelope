@@ -3,9 +3,9 @@ package com.snamon.redenvelope;
 import android.util.Log;
 
 /**
- * .
+ * @author snamon 2017-01-19
+ * 日志包装类 .
  */
-
 public class LoggWrap {
 
     private static final String TAG = "snamon";

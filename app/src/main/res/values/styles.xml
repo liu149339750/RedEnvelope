@@ -1,11 +1,31 @@
 <resources>
-
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <!-- 自定义toolbar高度 -->
+        <item name="actionBarSize">@dimen/actionbar_height</item>
+        <item name="actionOverflowButtonStyle">@style/actionBarMenu</item>
+    </style>
+
+    <style name="actionBarMenu" parent="android:style/Widget.Holo.Light.ActionButton.Overflow">
+        <item name="android:src">@mipmap/ic_back</item>
+    </style>
+
+    <style name="main_textview_style_1">
+        <item name="android:textColor">@color/text_1</item>
+        <item name="android:textSize">@dimen/sp_14</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="main_textview_style_2">
+        <item name="android:textColor">@color/text_1</item>
+        <item name="android:textSize">@dimen/sp_20</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
     </style>
 
 </resources>

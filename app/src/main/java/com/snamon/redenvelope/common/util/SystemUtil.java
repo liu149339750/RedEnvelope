@@ -1,18 +1,21 @@
-package com.snamon.redenvelope;
+package com.snamon.redenvelope.common.util;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.accessibility.AccessibilityManager;
 
+import com.snamon.redenvelope.LoggWrap;
+
 import java.util.List;
 
 /**
- * .
+ * 系统工具util .
  */
-
 public class SystemUtil {
 
     public static boolean hasAccessibilityService(Context context, @NonNull String serviceName) {
@@ -27,20 +30,21 @@ public class SystemUtil {
         return false;
     }
 
-    public static boolean isAccessibilitySettingsOn(Context mContext, String service) {
+    public static boolean isAccessibilitySettingsOn(Context mContext, String clsName) {
+        String service = mContext.getPackageName() + "/" + clsName;
         int accessibilityEnabled = 0;
         try {
             accessibilityEnabled = Settings.Secure.getInt(
                     mContext.getApplicationContext().getContentResolver(),
                     android.provider.Settings.Secure.ACCESSIBILITY_ENABLED);
-            LoggWrap.i("accessibilityEnabled = " + accessibilityEnabled);
+//            LoggWrap.i("accessibilityEnabled = " + accessibilityEnabled);
         } catch (Settings.SettingNotFoundException e) {
             LoggWrap.e("Error finding setting, default accessibility to not found: " + e.getMessage());
         }
         TextUtils.SimpleStringSplitter mStringColonSplitter = new TextUtils.SimpleStringSplitter(':');
 
         if (accessibilityEnabled == 1) {
-            LoggWrap.i("***ACCESSIBILITY IS ENABLED*** -----------------");
+//            LoggWrap.i("***ACCESSIBILITY IS ENABLED*** -----------------");
             String settingValue = Settings.Secure.getString(
                     mContext.getApplicationContext().getContentResolver(),
                     Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
@@ -51,7 +55,7 @@ public class SystemUtil {
 
                     LoggWrap.i("-------------- > accessibilityService :: " + accessibilityService + " " + service);
                     if (accessibilityService.equalsIgnoreCase(service)) {
-                        LoggWrap.i("We've found the correct setting - accessibility is switched on!");
+//                        LoggWrap.i("We've found the correct setting - accessibility is switched on!");
                         return true;
                     }
                 }
@@ -63,5 +67,28 @@ public class SystemUtil {
         return false;
     }
 
+
+    /**
+     * 获取栈顶Activity
+     */
+    public static String getTopActivityName(Context context){
+        String topActivityName=null;
+        ActivityManager activityManager =
+                (ActivityManager)(context.getSystemService(android.content.Context.ACTIVITY_SERVICE )) ;
+        List<ActivityManager.RunningTaskInfo> runningTaskInfos = activityManager.getRunningTasks(1) ;
+        if(runningTaskInfos != null){
+            ComponentName f=runningTaskInfos.get(0).topActivity;
+            String topActivityClassName=f.getClassName();
+            String temp[]=topActivityClassName.split("\\.");
+            //栈顶Activity的名称
+            topActivityName=temp[temp.length-1];
+//            int index=topActivityClassName.lastIndexOf(".");
+//            //栈顶Activity所属进程的名称
+//            processName=topActivityClassName.substring(0, index);
+//            System.out.println("---->topActivityName="+topActivityName+",processName="+processName);
+
+        }
+        return topActivityName;
+    }
 
 }

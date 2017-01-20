@@ -1,20 +1,150 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.snamon.redenvelope.MainActivity">
+    android:background="@mipmap/main_bg"
+>
 
-    <Button android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="模拟通知栏消息"
-            android:id="@+id/btn_mock_click"
+    <!--顶部布局-->
+
+    <ImageView android:id="@+id/main_iv_help"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_margin="10dp"
+               android:src="@mipmap/help"
+
     />
+    <ImageView android:id="@+id/main_iv_setting"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_alignParentRight="true"
+               android:layout_margin="10dp"
+               android:src="@mipmap/setting"
+    />
+
+    <!--<LinearLayout android:layout_width="match_parent"-->
+                  <!--android:layout_height="wrap_content"-->
+                  <!--android:layout_alignParentRight="@dimen/grab_packet_margin_bottom"-->
+                  <!--android:layout_marginLeft="@dimen/grab_packet_margin_bottom"-->
+                  <!--android:orientation="horizontal"-->
+                  <!--android:background="@color/text_2"-->
+                  <!---->
+                  <!---->
+    <!--&gt;-->
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical"
+                      android:layout_margin="@dimen/grab_packet_margin_left"
+                      android:layout_below="@id/main_iv_help"
+                      android:layout_alignParentLeft="true"
+        >
+            <TextView style="@style/main_textview_style_2"
+                      android:layout_gravity="center"
+                      android:text="今日战果"
+            />
+            <TextView style="@style/main_textview_style_1"
+                      android:layout_gravity="center"
+                      android:text="0"
+            />
+
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical"
+                      android:layout_margin="@dimen/grab_packet_margin_left"
+                      android:layout_below="@id/main_iv_setting"
+                      android:layout_alignParentRight="true"
+        >
+            <TextView style="@style/main_textview_style_2"
+                      android:layout_gravity="center"
+                      android:text="历史战果"
+            />
+            <TextView style="@style/main_textview_style_1"
+                      android:layout_gravity="center"
+                      android:text="0"
+            />
+
+        </LinearLayout>
+
+
+    <!--</LinearLayout>-->
+
+    <!--底部布局-->
+
+    <TextView
+        android:id="@+id/main_desc"
+        style="@style/main_textview_style_1"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/grab_packet_margin_bottom"
+        android:text="该应用仅为个人使用，切勿使用商业！"
+    />
+
+    <LinearLayout android:id="@+id/main_ll_opera"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_above="@id/main_desc"
+                  android:layout_marginBottom="@dimen/grab_packet_margin_bottom"
+                  android:orientation="horizontal"
+    >
+        <TextView style="@style/main_textview_style_2"
+                  android:layout_weight="1"
+                  android:drawablePadding="8dp"
+                  android:drawableTop="@mipmap/share"
+                  android:gravity="center"
+                  android:text="分享"
+        />
+        <TextView style="@style/main_textview_style_2"
+                  android:layout_weight="1"
+                  android:drawablePadding="8dp"
+                  android:drawableTop="@mipmap/vip_icon"
+                  android:gravity="center"
+                  android:text="VIP"
+
+        />
+        <TextView style="@style/main_textview_style_2"
+                  android:layout_weight="1"
+                  android:drawablePadding="8dp"
+                  android:drawableTop="@mipmap/reward_icon"
+                  android:gravity="center"
+                  android:text="打赏"
+        />
+
+    </LinearLayout>
+
+    <!--中间布局-->
+    <Button android:id="@+id/main_btn_grab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/main_ll_opera"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/grab_packet_margin_bottom"
+            android:background="@mipmap/grab_red_bg"
+            android:text="抢"
+            android:textColor="@color/text_2"
+            android:textSize="@dimen/sp_42"
+            android:textStyle="bold"
+    />
+    <!--<FrameLayout android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--&gt;-->
+    <!--<ImageView android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:src="@mipmap/grab_red_bg"-->
+    <!--/>-->
+    <!--<TextView android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:text="抢"-->
+    <!--android:textStyle="bold"-->
+    <!--android:layout_gravity="center"-->
+    <!--android:textColor="@color/text_2"-->
+    <!--android:textSize="@dimen/sp_36"-->
+    <!--/>-->
+
+    <!--</FrameLayout>-->
+
 
 </RelativeLayout>

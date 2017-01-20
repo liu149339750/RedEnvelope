@@ -37,4 +37,12 @@ dependencies {
     compile libraryModule.sweetalert
     compile libraryModule.rxjava
     compile libraryModule.rxandroid
+    compile libraryModule.rxBinding
+    compile libraryModule.rxLifecycle
+    compile libraryModule.rxLifecycleComponents
+    compile libraryModule.butterKnife
+    compile project(':rxbus')
+
+    annotationProcessor libraryModule.butterKnifeCompiler
+
 }

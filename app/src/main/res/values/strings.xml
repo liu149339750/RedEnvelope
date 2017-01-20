@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">RedEnvelope</string>
+    <string name="app_name">红包伴侣</string>
+    <string name="entry">点击开启</string>
+
+    <string name="prompt_open_service">请在【设置】> 【辅助功能】> 【服务】中开户【红包伴侣】，若还是不能正常使用，请点击左上角“帮助”正确设置.</string>
+    <string name="open_service_title">红包伴侣</string>
 </resources>

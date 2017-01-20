@@ -3,42 +3,59 @@ package com.snamon.redenvelope;
 import android.accessibilityservice.AccessibilityService;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.Intent;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import com.fcbox.rxbus.RxBus;
+import com.fcbox.rxbus.Subscribe;
+import com.snamon.redenvelope.common.util.SystemUtil;
+import com.snamon.redenvelope.event.OpenStatusEvent;
+import com.snamon.redenvelope.ui.MainActivity;
+
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * .
+ * 自动抢红包核心类 .
  */
-
 public class EnvelopeAccessibilityService extends AccessibilityService {
 
     /**
      * 返回聊天界面控制 .
      */
     private final AtomicBoolean firstEntryBoolean = new AtomicBoolean(false);
+    /**
+     * 控制是否停止抢红包 .
+     */
+    private AtomicBoolean stopBoolean  = new AtomicBoolean(true);
 
     /**
      * 处理当前的红包position .
      */
     private int currentIndex = 0;
 
+    /**
+     * 红包的总个数  .
+     */
     private int totalCount = 0;
 
     /**
      * 当前红包的节点信息 .
      */
 //    private List<AccessibilityNodeInfo> envelopeNodeInfos;
+
+
     @Override
     public void onInterrupt() {
+        LoggWrap.i("");
     }
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+        if (stopBoolean.get()) return;
         int eventType = event.getEventType();
         switch (eventType) {
             case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
@@ -67,6 +84,26 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
         }
     }
 
+    @Override
+    protected void onServiceConnected() {
+        //服务连接回调
+//        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+//        manager.moveTaskToFront(this.getApplicationContext().getTaskId(),0) ;
+        if (!MainActivity.class.getCanonicalName().equals(SystemUtil.getTopActivityName(this))) {
+            LoggWrap.i("MainActivity不处于栈顶，调到栈顶 .");
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+
+        }
+
+    }
+
+    @Subscribe
+    public void onEvent(OpenStatusEvent event){
+        LoggWrap.i(event.isStop?"停止抢红包":"开启抢红包");
+        stopBoolean.set(event.isStop);
+    }
     /**
      * 检测红包是否已处理完成
      */
@@ -117,7 +154,7 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
                     handNextEnvelope();
                 }
             }
-        }else {
+        } else {
             LoggWrap.i("红包处理完成 .");
         }
     }
@@ -200,5 +237,10 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
         return content != null && content.toString().contains("[微信红包]");
     }
 
-
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        LoggWrap.i("onCreate");
+        RxBus.getDefault().register(this);
+    }
 }

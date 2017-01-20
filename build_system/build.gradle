@@ -9,11 +9,6 @@ ext {
     versionCode = 100 // 版本号由版本名映射，主版本号 * 10000 + 子版本号 * 100 + 修正版本号，例如1.2.10 -> 10210
     versionName = '0.1.0' // 版本名采用GNU风格，主版本号.子版本号.修正版本号，例如1.2.10
 
-// Artifactory
-// --------------------------------------------------------------------------------
-    contextUrl = 'http://artifactory.fcbox.com:8081/artifactory/'
-    groupId = 'com.fcbox.android'
-    artifactId = 'rocket'
 // Libraries
 // --------------------------------------------------------------------------------
     supportVersion = '24.2.1'
@@ -21,6 +16,9 @@ ext {
     sweetalertVersion='1.3'
     rxJavaVersion = '1.2.3'
     rxAndroidVersion = '1.2.1'
+    rxLifecycleVersion = '0.8.0'
+    rxBindingVersion = '0.4.0'
+    butterKnifeVersion = '8.4.0'
 
 // Modules
 // --------------------------------------------------------------------------------
@@ -29,6 +27,11 @@ ext {
             appcompatv7      : "com.android.support:appcompat-v7:${appcompatv7Version}",
             sweetalert       : "cn.pedant.sweetalert:library:${sweetalertVersion}",
             rxjava               : "io.reactivex:rxjava:${rxJavaVersion}",
-            rxandroid            : "io.reactivex:rxandroid:${rxAndroidVersion}"
+            rxandroid            : "io.reactivex:rxandroid:${rxAndroidVersion}",
+            rxBinding            : "com.jakewharton.rxbinding:rxbinding:${rxBindingVersion}",
+            rxLifecycle          : "com.trello:rxlifecycle:${rxLifecycleVersion}",
+            rxLifecycleComponents: "com.trello:rxlifecycle-components:${rxLifecycleVersion}",
+            butterKnife          : "com.jakewharton:butterknife:${butterKnifeVersion}",
+            butterKnifeCompiler  : "com.jakewharton:butterknife-compiler:${butterKnifeVersion}"
     ]
 }
