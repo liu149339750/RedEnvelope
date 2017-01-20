@@ -4,8 +4,8 @@ import android.content.Intent;
 import android.os.SystemClock;
 
 import com.snamon.redenvelope.EnvelopeGlobal;
-import com.snamon.redenvelope.LoggWrap;
 import com.snamon.redenvelope.R;
+import com.snamon.redenvelope.common.util.Log;
 import com.snamon.redenvelope.widget.BaseActivity;
 
 import rx.Observable;
@@ -36,10 +36,10 @@ public class SplashActivity extends BaseActivity {
                 .subscribe(aBoolean -> {
                     if (aBoolean) {
                         //进入引导
-                        LoggWrap.i("进入引导页面 .");
-                        startActivity(new Intent(SplashActivity.this, WelcomeGuideActivity.class));
+                        Log.i("进入引导页面 .");
+                        UserGuideActivity.startMe(this);
                     } else {
-                        LoggWrap.i("进入主面 .");
+                        Log.i("进入主面 .");
                         startActivity(new Intent(SplashActivity.this, MainActivity.class));
                     }
                     finish();

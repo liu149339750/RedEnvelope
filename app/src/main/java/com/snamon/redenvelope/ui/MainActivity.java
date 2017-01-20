@@ -37,7 +37,7 @@ public class MainActivity extends BaseActivity {
             showDialog();
         }
 
-        //监听
+        //监听"抢"
         viewClick(R.id.main_btn_grab)
                 .doOnNext(aVoid -> mOpenStatusEvent.isStop = !mOpenStatusEvent.isStop)
                 .subscribe(aVoid -> {
@@ -73,5 +73,4 @@ public class MainActivity extends BaseActivity {
                 });
         mSweetAlertDialog.show();
     }
-
 }

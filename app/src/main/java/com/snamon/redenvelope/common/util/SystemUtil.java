@@ -9,8 +9,6 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.accessibility.AccessibilityManager;
 
-import com.snamon.redenvelope.LoggWrap;
-
 import java.util.List;
 
 /**
@@ -22,7 +20,7 @@ public class SystemUtil {
         AccessibilityManager am = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
         List<AccessibilityServiceInfo> accessibilityServiceInfos = am.getInstalledAccessibilityServiceList();
         for (AccessibilityServiceInfo accessibilityServiceInfo : accessibilityServiceInfos) {
-            LoggWrap.i("isEnableAccessibilityService id : " + accessibilityServiceInfo.getId());
+            Log.i(Log.TAG, "isEnableAccessibilityService id : " + accessibilityServiceInfo.getId());
             if (serviceName.equals(accessibilityServiceInfo.getId())) {
                 return true;
             }
@@ -39,7 +37,7 @@ public class SystemUtil {
                     android.provider.Settings.Secure.ACCESSIBILITY_ENABLED);
 //            LoggWrap.i("accessibilityEnabled = " + accessibilityEnabled);
         } catch (Settings.SettingNotFoundException e) {
-            LoggWrap.e("Error finding setting, default accessibility to not found: " + e.getMessage());
+            Log.e("Error finding setting, default accessibility to not found: " + e.getMessage());
         }
         TextUtils.SimpleStringSplitter mStringColonSplitter = new TextUtils.SimpleStringSplitter(':');
 
@@ -53,7 +51,7 @@ public class SystemUtil {
                 while (mStringColonSplitter.hasNext()) {
                     String accessibilityService = mStringColonSplitter.next();
 
-                    LoggWrap.i("-------------- > accessibilityService :: " + accessibilityService + " " + service);
+//                    Log.i("-------------- > accessibilityService :: " + accessibilityService + " " + service);
                     if (accessibilityService.equalsIgnoreCase(service)) {
 //                        LoggWrap.i("We've found the correct setting - accessibility is switched on!");
                         return true;
@@ -61,7 +59,7 @@ public class SystemUtil {
                 }
             }
         } else {
-            LoggWrap.i("***ACCESSIBILITY IS DISABLED***");
+            Log.i(Log.TAG, "***ACCESSIBILITY IS DISABLED***");
         }
 
         return false;
@@ -71,17 +69,17 @@ public class SystemUtil {
     /**
      * 获取栈顶Activity
      */
-    public static String getTopActivityName(Context context){
-        String topActivityName=null;
+    public static String getTopActivityName(Context context) {
+        String topActivityName = null;
         ActivityManager activityManager =
-                (ActivityManager)(context.getSystemService(android.content.Context.ACTIVITY_SERVICE )) ;
-        List<ActivityManager.RunningTaskInfo> runningTaskInfos = activityManager.getRunningTasks(1) ;
-        if(runningTaskInfos != null){
-            ComponentName f=runningTaskInfos.get(0).topActivity;
-            String topActivityClassName=f.getClassName();
-            String temp[]=topActivityClassName.split("\\.");
+                (ActivityManager) (context.getSystemService(android.content.Context.ACTIVITY_SERVICE));
+        List<ActivityManager.RunningTaskInfo> runningTaskInfos = activityManager.getRunningTasks(1);
+        if (runningTaskInfos != null) {
+            ComponentName f = runningTaskInfos.get(0).topActivity;
+            String topActivityClassName = f.getClassName();
+            String temp[] = topActivityClassName.split("\\.");
             //栈顶Activity的名称
-            topActivityName=temp[temp.length-1];
+            topActivityName = temp[temp.length - 1];
 //            int index=topActivityClassName.lastIndexOf(".");
 //            //栈顶Activity所属进程的名称
 //            processName=topActivityClassName.substring(0, index);

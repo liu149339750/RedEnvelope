@@ -64,7 +64,7 @@ public abstract class BaseFragment extends RxFragment {
     public Observable<Void> viewClick(@NonNull View view) {
         return RxView.clicks(view)
                 .throttleFirst(500, TimeUnit.MILLISECONDS)
-                .compose(this.<Void>bindToLifecycle());
+                .compose(this.bindToLifecycle());
     }
 
     /**

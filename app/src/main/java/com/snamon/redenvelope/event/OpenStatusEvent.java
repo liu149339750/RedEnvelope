@@ -1,7 +1,7 @@
 package com.snamon.redenvelope.event;
 
 /**
- * .
+ * 打开服务状态事件.
  */
 
 public class OpenStatusEvent {
