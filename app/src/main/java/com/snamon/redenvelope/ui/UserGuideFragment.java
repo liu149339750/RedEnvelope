@@ -52,6 +52,13 @@ public class UserGuideFragment extends BaseFragment {
         mDotViews[0] = mRadioButton1;
         mDotViews[1] = mRadioButton2;
         mDotViews[2] = mRadioButton3;
+
+        viewClick(R.id.tv_skip)
+                .subscribe(aVoid -> {
+                    if (mObserVerListener != null) {
+                        mObserVerListener.onFinishGuide();
+                    }
+                });
     }
 
     @Override

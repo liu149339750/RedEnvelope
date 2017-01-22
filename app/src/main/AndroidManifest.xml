@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.snamon.redenvelope">
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.snamon.redenvelope">
 
     <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE"/>
     <uses-permission android:name="android.permission.GET_TASKS"/>
     <uses-permission android:name="android.permission.REORDER_TASKS"/>
-
 
     <application
         android:name=".MyApplication"
@@ -16,11 +15,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:icon">
-
         <activity android:name=".ui.MainActivity"/>
-        <activity
-            android:name=".ui.UserGuideActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity android:name=".ui.UserGuideActivity"/>
 
         <service
             android:name=".EnvelopeAccessibilityService"
@@ -28,12 +24,12 @@
             android:exported="true"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
+                <action android:name="android.accessibilityservice.AccessibilityService"/>
             </intent-filter>
 
             <meta-data
                 android:name="android.accessibilityservice"
-                android:resource="@xml/accessibility" />
+                android:resource="@xml/accessibility"/>
         </service>
 
         <activity android:name=".ui.SplashActivity">
@@ -43,7 +39,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".ui.WelcomeGuideActivity">
+        <activity android:name=".ui.TestActivity">
+
         </activity>
     </application>
 

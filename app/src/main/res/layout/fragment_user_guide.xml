@@ -8,6 +8,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <TextView android:id="@+id/tv_skip"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_alignParentRight="true"
+              android:layout_margin="8dp"
+              android:clickable="true"
+              android:text="跳过 >"
+              android:textColor="@color/yellow_3"
+              android:textSize="@dimen/sp_20"
+    />
+
     <RadioGroup
         android:id="@+id/dot_group"
         android:layout_width="wrap_content"
