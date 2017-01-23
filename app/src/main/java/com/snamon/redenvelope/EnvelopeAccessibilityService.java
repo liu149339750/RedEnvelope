@@ -3,7 +3,7 @@ package com.snamon.redenvelope;
 import android.accessibilityservice.AccessibilityService;
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.Intent;
+import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
@@ -28,6 +28,7 @@ import static java.lang.System.currentTimeMillis;
  */
 public class EnvelopeAccessibilityService extends AccessibilityService {
     private static String TAG = EnvelopeAccessibilityService.class.getSimpleName();
+    private Context mContext;
     /**
      * 聊天页面的ListView资源id
      */
@@ -77,34 +78,50 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
      * 控制是否停止抢红包 .
      */
     private AtomicBoolean stopBoolean = new AtomicBoolean(true);
-
-    /**
-     * 处理当前的红包position .
-     */
-    private int currentIndex = 0;
-    /**
-     * 红包的总个数  .
-     */
-    private int totalCount = 0;
     private long lastNotifytime;
     private String lastWxActivityName;
 
     private MediaPlayer mp;
 
+    public EnvelopeAccessibilityService(){
+        mContext = this;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.i("onCreate");
+        mContext = this;
+        mp = MediaPlayer.create(mContext.getApplicationContext(), R.raw.redsound);
+        RxBus.getDefault().register(mContext);
+    }
+
+    @Override
+    protected void onServiceConnected() {
+        //服务连接回调
+//        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+//        manager.moveTaskToFront(mContext.getApplicationContext().getTaskId(),0) ;
+        if (!MainActivity.class.getCanonicalName().equals(SystemUtil.getTopActivityName(mContext))) {
+            Log.i("MainActivity不处于栈顶，调到栈顶 .");
+            MainActivity.startMe(mContext);
+        }
+    }
+
     @Override
     public void onInterrupt() {
-        Toast.makeText(this, "中断抢红包服务", Toast.LENGTH_SHORT).show();
+        Toast.makeText(mContext, "中断抢红包服务", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        if (stopBoolean.get()) return;
+        if (stopBoolean.get()) {
+            Log.e(TAG,"clsName:"+event.getClassName());
+            return;
+        }
         int eventType = event.getEventType();
-//        Log.e(TAG, "accessibiity_event来了。。：" + event.getEventType() + ",clsname:" + event.getClassName());
         switch (eventType) {
             case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
-                //通知改变(Toast也会调用这个方法)
-                handleNotification(event);
+                handleNotification(event);//通知改变(Toast也会调用这个方法)
                 break;
             case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
                 String clsName = event.getClassName().toString();
@@ -115,16 +132,14 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
                     if (firstEntryBoolean.get()) {
                         //说明是从通知栏进入到Chat页面 初始化参数
                         firstEntryBoolean.set(false);
-                        initData();
+                        mockClickEnvelope();
                     }
-                    handNextEnvelope();
                 }
                 if (ACTIVITY_NAME_WX_ENVELOPE.equals(clsName)) {
-                    //打开红包
-                    moneyReceiveClick();
+                    mockOpenEnvelope();//打开红包
                 }
                 if (ACTIVITY_NAME_WX_REDPACK_DETAIL.equals(clsName)) {
-                    moneyDetailClick();
+                    mockEnvelopDetailClick();
                 }
                 if (ACTIVITY_NAME_WX_NEED_SMRZ_TIP.equals(clsName)) {
                     cloaseActivity(ID_CANCEL_SMRZ_VIEW);
@@ -139,32 +154,16 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
                 long duration = System.currentTimeMillis() - lastNotifytime;
                 if (duration < 1000) {
                     lastNotifytime += duration;
-                    Toast.makeText(this, "间隔太短，说明是从通知栏来的导致listvie变化", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(mContext, "间隔太短，说明是从通知栏来的导致listvie变化", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if (!isNewRedpackMsg()) {
                     return;
                 }
                 playSound();
-                initData();
-                handNextEnvelope();
+                mockClickEnvelope();
                 break;
         }
-    }
-
-    @Override
-    protected void onServiceConnected() {
-        //服务连接回调
-//        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-//        manager.moveTaskToFront(this.getApplicationContext().getTaskId(),0) ;
-        if (!MainActivity.class.getCanonicalName().equals(SystemUtil.getTopActivityName(this))) {
-            Log.i("MainActivity不处于栈顶，调到栈顶 .");
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            startActivity(intent);
-
-        }
-
     }
 
     @Subscribe
@@ -188,36 +187,11 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
         }
     }
 
-    /**
-     * 检测红包是否已处理完成
-     */
-    private boolean checkHandleEnvelopeComplete() {
-        return currentIndex == 0;
-    }
-
-    private void initData() {
-        List<AccessibilityNodeInfo> nodeInfos = genEnvelopeNodeInfos();
-        if (nodeInfos != null) {
-            totalCount = nodeInfos.size();
-            currentIndex = totalCount; //从最后一个红包开始处理 .
-            Log.i("总共有" + totalCount + "个红包需要处理 .");
-        } else {
-            Log.e(TAG, "微信版本太低，请升级微信至6.3.27以上");
-        }
-    }
-
     @Nullable
     private List<AccessibilityNodeInfo> genEnvelopeNodeInfos() {
         AccessibilityNodeInfo accessibilityNodeInfo = getRootInActiveWindow();
         if (accessibilityNodeInfo != null) {
-            // TODO: 2017/1/18 snamon 这里有一个问题，假如此红包已抢，我们也要模拟点击一次，不过不会联网，性能影响不大，是否可优化？
-            List<AccessibilityNodeInfo> envelopeNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(
-                    ID_CHAT_REDPACK_VIEW);
-            if (envelopeNodeInfos == null || envelopeNodeInfos.size() == 0) {
-                Log.e(TAG, "非最新微信版本，尝试获取ver6.3.27版本的 红包借点集合");
-                envelopeNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(
-                        "com.tencent.mm:id/a3p"); //ver 6.3.27
-            }
+            List<AccessibilityNodeInfo> envelopeNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(ID_CHAT_REDPACK_VIEW);
             accessibilityNodeInfo.recycle();
             return envelopeNodeInfos;
         }
@@ -225,62 +199,37 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
     }
 
     /**
-     * 处理下一个红包 .
+     * 模拟点击 对话列表中最后一个红包(现在不管有多少红包，总之只会处理最后一个红包，因为无法判断某个红包是否被点击过)
      */
-    private void handNextEnvelope() {
-        if (!checkHandleEnvelopeComplete()) {
-            --currentIndex;
-            Log.i("处理" + (currentIndex + 1) + "号红包 .");
-            //重新获取红包节点
-            List<AccessibilityNodeInfo> nodeInfos = genEnvelopeNodeInfos();
-            for (AccessibilityNodeInfo nodeinfo : nodeInfos) {
-                Log.e(TAG, "nodeinfo.isinvalid:" + nodeinfo);
-            }
-            if (nodeInfos != null) {
-                if (nodeInfos.size() == totalCount) {
-                    AccessibilityNodeInfo envelopeNodeInfo = nodeInfos.get(currentIndex);
-                    envelopeNodeInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                } else {
-                    //防止在拆多个红包，红包节点个数改变 . 需重新开始遍历
-                    Log.i("红包节点个数已改变 .");
-                    initData();
-                    handNextEnvelope();
-                }
-            }
-        } else {
-            Log.i("红包处理完成 .");
+    private void mockClickEnvelope() {
+        List<AccessibilityNodeInfo> nodeInfos = genEnvelopeNodeInfos();
+        if (nodeInfos != null && nodeInfos.size() > 0) {
+            nodeInfos.get(nodeInfos.size() - 1).performAction(AccessibilityNodeInfo.ACTION_CLICK);
         }
     }
 
     /**
-     * 模拟点击"开"红包 .
+     * 模拟点击"开"红包信封 .
      */
-    private void moneyReceiveClick() {
+    private void mockOpenEnvelope() {
         AccessibilityNodeInfo accessibilityNodeInfo = getRootInActiveWindow();
         if (accessibilityNodeInfo != null) {
-            List<AccessibilityNodeInfo> accessibilityNodeInfos =
-                    accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(ID_OPEN_ENVELOPE_VIEW);
-            if (accessibilityNodeInfos == null || accessibilityNodeInfos.size() == 0) {
-                accessibilityNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(
-                        "com.tencent.mm:id/bdg"); //ver 6.3.27
-            }
+            List<AccessibilityNodeInfo> accessibilityNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(ID_OPEN_ENVELOPE_VIEW);
             for (AccessibilityNodeInfo ani : accessibilityNodeInfos) {
                 ani.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                Log.i("模拟拆红包///");
             }
             accessibilityNodeInfo.recycle();
         }
     }
 
     /**
-     * 模拟红包详情 .
+     * 模拟红包详情  点击返回
      */
-    private void moneyDetailClick() {
+    private void mockEnvelopDetailClick() {
         AccessibilityNodeInfo accessibilityNodeInfo = getRootInActiveWindow();
         if (accessibilityNodeInfo != null) {
             //获取消息
-            List<AccessibilityNodeInfo> moneyNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(
-                    "com.tencent.mm:id/bbe");
+            List<AccessibilityNodeInfo> moneyNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId("com.tencent.mm:id/bbe");
             if (moneyNodeInfos != null && moneyNodeInfos.size() != 0) {
                 CharSequence moneyCharSequence = moneyNodeInfos.get(0).getText();
                 if (moneyCharSequence != null) {
@@ -288,8 +237,7 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
                 }
             }
             //点击返回
-            List<AccessibilityNodeInfo> backNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(
-                    "com.tencent.mm:id/gr");
+            List<AccessibilityNodeInfo> backNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId("com.tencent.mm:id/gr");
             if (backNodeInfos == null || backNodeInfos.size() == 0) {
                 backNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId("com.tencent.mm:id/ft");
                 Log.e(TAG, "非最新微信版本，尝试获取ver6.3.27版本的 关闭按钮，获得按钮backNodeInfos.size：" + backNodeInfos.size());
@@ -302,6 +250,9 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
         }
     }
 
+    /**
+     * 监听通知栏消息，并判断是否是 微信红包消息
+     */
     private void handleNotification(AccessibilityEvent event) {
         Parcelable data = event.getParcelableData();
         if (data instanceof Notification) {
@@ -310,9 +261,7 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
             CharSequence text = notification.extras.getCharSequence(Notification.EXTRA_TEXT);
             CharSequence sub_text = notification.extras.getCharSequence(Notification.EXTRA_SUB_TEXT);
             CharSequence info = notification.extras.getCharSequence(Notification.EXTRA_INFO_TEXT);
-            // TODO: 2017/1/17 snamon 检测值
             if (checkWxEnvelope(title) || checkWxEnvelope(text) || checkWxEnvelope(sub_text) || checkWxEnvelope(info)) {
-                Log.i("收到微信通知,是微信红包.");
                 //说明是红包
                 PendingIntent contentIntent = notification.contentIntent;
                 if (contentIntent != null) {
@@ -334,33 +283,31 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
         return content != null && content.toString().contains(KEY_TEXT_REDPACK_);
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.i("onCreate");
-        mp = MediaPlayer.create(this.getApplicationContext(), R.raw.redsound);
-        RxBus.getDefault().register(this);
-    }
-
     /**
      * 来的新消息是否是红包消息
      */
     public boolean isNewRedpackMsg() {
         AccessibilityNodeInfo rootNodeinfo = getRootInActiveWindow();
-        if (rootNodeinfo != null) {
-            List<AccessibilityNodeInfo> nodeinfos = rootNodeinfo.findAccessibilityNodeInfosByViewId(
-                    ID_CHAT_LISTVIEW); //获取聊天页面的ListView
-            if (nodeinfos.isEmpty()) {
-                return false;
-            }
-            AccessibilityNodeInfo listviewNodeInfo = nodeinfos.get(0);
-            AccessibilityNodeInfo childNodeInfo = listviewNodeInfo.getChild(listviewNodeInfo.getChildCount() - 1);
-            List<AccessibilityNodeInfo> redpackNodeInfos = childNodeInfo.findAccessibilityNodeInfosByViewId(
-                    ID_CHAT_REDPACK_VIEW); //获取最后一个聊天消息Item里面是否有红包节点
-            if (redpackNodeInfos.isEmpty()) { //不是红包消息
-                return false;
-            }
+        if(rootNodeinfo == null){
+            return false;
         }
+        List<AccessibilityNodeInfo> nodeinfos = rootNodeinfo.findAccessibilityNodeInfosByViewId(ID_CHAT_LISTVIEW); //获取聊天页面的ListView
+        if (nodeinfos.isEmpty()) {
+            rootNodeinfo.recycle(); //记得回收
+            return false;
+        }
+        AccessibilityNodeInfo listviewNodeInfo = nodeinfos.get(0);
+        AccessibilityNodeInfo childNodeInfo = listviewNodeInfo.getChild(listviewNodeInfo.getChildCount() - 1);
+        if(childNodeInfo == null){
+            rootNodeinfo.recycle();
+            return false;
+        }
+        List<AccessibilityNodeInfo> redpackNodeInfos = childNodeInfo.findAccessibilityNodeInfosByViewId(ID_CHAT_REDPACK_VIEW); //获取最后一个聊天消息Item里面是否有红包节点
+        if (redpackNodeInfos.isEmpty()) { //不是红包消息
+            rootNodeinfo.recycle();
+            return false;
+        }
+        rootNodeinfo.recycle();
         return true;
     }
 
@@ -369,7 +316,7 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
      */
     private void playSound() {
         mp.reset();
-        mp = MediaPlayer.create(this.getApplicationContext(), R.raw.redsound);
+        mp = MediaPlayer.create(mContext.getApplicationContext(), R.raw.redsound);
         mp.start();
 
     }

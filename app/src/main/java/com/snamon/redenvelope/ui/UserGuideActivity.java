@@ -20,8 +20,7 @@ public class UserGuideActivity extends EmptyFragmentActivity {
     public Fragment getContentFragment() {
         UserGuideFragment fragment = UserGuideFragment.instantiate();
         fragment.setOnFinishGuideListener(() -> {
-            Intent intent = new Intent(UserGuideActivity.this, MainActivity.class);
-            startActivity(intent);
+            MainActivity.startMe(mActivity);
             EnvelopeGlobal.getSp().setFirstAccess(false);
             finish();
         });

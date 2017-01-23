@@ -4,7 +4,7 @@
 
     <string name="prompt_open_service">请在【设置】> 【辅助功能】> 【服务】中开户【红包伴侣】，若还是不能正常使用，请点击左上角“帮助”正确设置.</string>
     <string name="open_service_title">红包伴侣</string>
-    <string name="description">打开辅助服务是使用[微信自动抢红包]功能所需，帮助用户开启无人值守自动化抢红包。\n提示：打开
+    <string name="description">打开辅助服务是使用[微信自动抢红包]功能所需，帮助用户开启无人值守自动化抢红包。\n\n提示：打开
         辅助功能时，会收到系统例行的警告提醒，本软件不会进行侵害用户利益的行为，您可以放心开启。
     </string>
 </resources>

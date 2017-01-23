@@ -1,5 +1,7 @@
 package com.snamon.redenvelope.ui;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
 import android.widget.Button;
@@ -29,6 +31,15 @@ public class MainActivity extends BaseActivity {
     public Button mBtnGrab;
 
     private OpenStatusEvent mOpenStatusEvent;
+
+    public static void startMe(Context context){
+        Intent intent = new Intent(context,MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if(false == context instanceof Activity){
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
+        context.startActivity(intent);
+    }
 
     @Override
     protected void init() {

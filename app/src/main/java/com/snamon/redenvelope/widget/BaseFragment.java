@@ -17,6 +17,7 @@ import com.trello.rxlifecycle.components.support.RxFragment;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import rx.Observable;
 
@@ -24,6 +25,7 @@ public abstract class BaseFragment extends RxFragment {
     protected Context mContext;
     private View mContentView;
     private SweetAlertDialog mSweetAlertDialog;
+    private Unbinder mUnbinder;
 
     @Override
     public void onAttach(Context context) {
@@ -40,7 +42,7 @@ public abstract class BaseFragment extends RxFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mContentView = inflater.inflate(genLayoutRes(), container, false);
-        ButterKnife.bind(this , mContentView);
+        mUnbinder = ButterKnife.bind(this , mContentView);
         initProxy(savedInstanceState);
         return mContentView;
     }
@@ -54,6 +56,7 @@ public abstract class BaseFragment extends RxFragment {
     @Override
     public void onDetach() {
         super.onDetach();
+        mUnbinder.unbind();
         mContext = null;
     }
 

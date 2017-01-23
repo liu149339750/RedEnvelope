@@ -68,6 +68,7 @@ public class SystemUtil {
 
     /**
      * 获取栈顶Activity
+     * @deprecated  This method was deprecated in API level 21.
      */
     public static String getTopActivityName(Context context) {
         String topActivityName = null;

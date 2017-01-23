@@ -1,6 +1,5 @@
 package com.snamon.redenvelope.ui;
 
-import android.content.Intent;
 import android.os.SystemClock;
 
 import com.snamon.redenvelope.EnvelopeGlobal;
@@ -40,7 +39,7 @@ public class SplashActivity extends BaseActivity {
                         UserGuideActivity.startMe(this);
                     } else {
                         Log.i("进入主面 .");
-                        startActivity(new Intent(SplashActivity.this, MainActivity.class));
+                        MainActivity.startMe(mActivity);
                     }
                     finish();
                 });

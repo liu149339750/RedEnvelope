@@ -4,6 +4,7 @@
 
 package com.snamon.redenvelope.widget;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
@@ -33,7 +34,7 @@ import rx.Observable;
  * Base activity.
  */
 public abstract class BaseActivity extends RxAppCompatActivity {
-
+    protected Activity mActivity;
     private View mContentView;
     @Nullable
     private Toolbar mToolbar;
@@ -43,6 +44,7 @@ public abstract class BaseActivity extends RxAppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mActivity = this;
         mContentView = View.inflate(this, initLayoutRes(), null);
         setContentView(mContentView);
         ButterKnife.bind(this);
