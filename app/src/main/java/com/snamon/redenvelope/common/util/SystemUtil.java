@@ -4,12 +4,15 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.accessibility.AccessibilityManager;
 
 import java.util.List;
+
 
 /**
  * 系统工具util .
@@ -88,6 +91,18 @@ public class SystemUtil {
 
         }
         return topActivityName;
+    }
+
+    public static String getVersionName(Context context,String packageName) {
+        try{
+            PackageInfo pinfo = context.getPackageManager().getPackageInfo(packageName, 0);
+            if(pinfo != null) {
+                return pinfo.versionName;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

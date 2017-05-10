@@ -29,18 +29,38 @@ import static java.lang.System.currentTimeMillis;
 public class EnvelopeAccessibilityService extends AccessibilityService {
     private static String TAG = EnvelopeAccessibilityService.class.getSimpleName();
     private Context mContext;
+
+    public static final String WEICHAT_VERSION[] = {"6.5.7"};
+
+    static final String BASE_RESOURCE_STR = "com.tencent.mm:id/";
     /**
      * 聊天页面的ListView资源id
      */
     public static final String ID_CHAT_LISTVIEW = "com.tencent.mm:id/a1d";
+    public static final String ID_CHAT_LISTVIEWS[] = {"a2i"};
+    private String mListViewId = ID_CHAT_LISTVIEW;
     /**
      * 红包节点资源id
      */
     public static final String ID_CHAT_REDPACK_VIEW = "com.tencent.mm:id/a48";
+    public static final String ID_CHAT_REDPACK_VIEWS[] = {"a5c"};
+    private String mRedpackViewId = ID_CHAT_REDPACK_VIEW;
     /**
      * 红包信封窗口模样的页面 开按钮
      */
     static final String ID_OPEN_ENVELOPE_VIEW = "com.tencent.mm:id/be_";
+    public static final String ID_OPEN_ENVELOPE_VIEWS[] = {"bjj"};
+    private String mRedPackOpenBtnId = ID_OPEN_ENVELOPE_VIEW;
+
+    /**详情界面返回按钮*/
+    static final String ID_DETAIL_BACK_VIEW = "com.tencent.mm:id/gr";
+    public static final String ID_DETAIL_BACK_VIEWS[] = {"gv"};
+    private String mDetalBackId = ID_DETAIL_BACK_VIEW;
+
+    /**抢到的红包金额*/
+    static final String ID_DETAIL_MONEY_VIEW = "com.tencent.mm:id/bbe";
+    public static final String ID_DETAIL_MONEY_VIEWS[] = {"bfw"};
+    private String mMoneyId = ID_DETAIL_MONEY_VIEW;
     /**
      * 取消实名认证 按钮id
      */
@@ -61,6 +81,10 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
      * 微信信封页面 窗口
      */
     static final String ACTIVITY_NAME_WX_ENVELOPE = "com.tencent.mm.plugin.luckymoney.ui.LuckyMoneyReceiveUI";
+    public static final String ACTIVITY_NAME_WX_ENVELOPES[] = {"com.tencent.mm.plugin.luckymoney.ui.En_fba4b94f"};
+    private String mWxEnvelopeActivity = ACTIVITY_NAME_WX_ENVELOPE;
+
+
     /**
      * 微信红包详情页
      */
@@ -87,6 +111,8 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
         mContext = this;
     }
 
+    private String mWeichatVersion;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -94,6 +120,20 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
         mContext = this;
         mp = MediaPlayer.create(mContext.getApplicationContext(), R.raw.redsound);
         RxBus.getDefault().register(mContext);
+        mWeichatVersion = ((MyApplication)getApplication()).getWeichatVersion();
+        int len = WEICHAT_VERSION.length;
+        for(int i=0;i< len;i++) {
+            String v = WEICHAT_VERSION[i];
+            if(v.equals(mWeichatVersion)) {
+                mRedpackViewId = BASE_RESOURCE_STR + ID_CHAT_REDPACK_VIEWS[i];
+                mListViewId = BASE_RESOURCE_STR + ID_CHAT_LISTVIEWS[i];
+                mDetalBackId = BASE_RESOURCE_STR + ID_DETAIL_BACK_VIEWS[i];
+                mMoneyId = BASE_RESOURCE_STR + ID_DETAIL_MONEY_VIEWS[i];
+                mRedPackOpenBtnId = BASE_RESOURCE_STR + ID_OPEN_ENVELOPE_VIEWS[i];
+
+                mWxEnvelopeActivity = ACTIVITY_NAME_WX_ENVELOPES[i];
+            }
+        }
     }
 
     @Override
@@ -135,7 +175,7 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
                         mockClickEnvelope();
                     }
                 }
-                if (ACTIVITY_NAME_WX_ENVELOPE.equals(clsName)) {
+                if (mWxEnvelopeActivity.equals(clsName)) {
                     mockOpenEnvelope();//打开红包
                 }
                 if (ACTIVITY_NAME_WX_REDPACK_DETAIL.equals(clsName)) {
@@ -160,7 +200,6 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
                 if (!isNewRedpackMsg()) {
                     return;
                 }
-                playSound();
                 mockClickEnvelope();
                 break;
         }
@@ -191,7 +230,7 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
     private List<AccessibilityNodeInfo> genEnvelopeNodeInfos() {
         AccessibilityNodeInfo accessibilityNodeInfo = getRootInActiveWindow();
         if (accessibilityNodeInfo != null) {
-            List<AccessibilityNodeInfo> envelopeNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(ID_CHAT_REDPACK_VIEW);
+            List<AccessibilityNodeInfo> envelopeNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(mRedpackViewId);
             accessibilityNodeInfo.recycle();
             return envelopeNodeInfos;
         }
@@ -202,8 +241,16 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
      * 模拟点击 对话列表中最后一个红包(现在不管有多少红包，总之只会处理最后一个红包，因为无法判断某个红包是否被点击过)
      */
     private void mockClickEnvelope() {
+        Log.i("mockClickEnvelope");
         List<AccessibilityNodeInfo> nodeInfos = genEnvelopeNodeInfos();
         if (nodeInfos != null && nodeInfos.size() > 0) {
+            String className = nodeInfos.get(nodeInfos.size() - 1).getClassName().toString();
+
+            if("android.widget.FrameLayout".equals(className) && "6.5.7".equals(mWeichatVersion)) {
+                Log.v(TAG,"the redpack node id and the attachment node id is same as pcture node id");
+                return;
+            }
+            playSound();
             nodeInfos.get(nodeInfos.size() - 1).performAction(AccessibilityNodeInfo.ACTION_CLICK);
         }
     }
@@ -212,9 +259,11 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
      * 模拟点击"开"红包信封 .
      */
     private void mockOpenEnvelope() {
+        Log.i("mockOpenEnvelope");
         AccessibilityNodeInfo accessibilityNodeInfo = getRootInActiveWindow();
         if (accessibilityNodeInfo != null) {
-            List<AccessibilityNodeInfo> accessibilityNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(ID_OPEN_ENVELOPE_VIEW);
+            List<AccessibilityNodeInfo> accessibilityNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(mRedPackOpenBtnId);
+
             for (AccessibilityNodeInfo ani : accessibilityNodeInfos) {
                 ani.performAction(AccessibilityNodeInfo.ACTION_CLICK);
             }
@@ -229,7 +278,8 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
         AccessibilityNodeInfo accessibilityNodeInfo = getRootInActiveWindow();
         if (accessibilityNodeInfo != null) {
             //获取消息
-            List<AccessibilityNodeInfo> moneyNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId("com.tencent.mm:id/bbe");
+            List<AccessibilityNodeInfo> moneyNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(mMoneyId);
+            Log.v(TAG,mMoneyId + " > " + moneyNodeInfos.size());
             if (moneyNodeInfos != null && moneyNodeInfos.size() != 0) {
                 CharSequence moneyCharSequence = moneyNodeInfos.get(0).getText();
                 if (moneyCharSequence != null) {
@@ -237,7 +287,7 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
                 }
             }
             //点击返回
-            List<AccessibilityNodeInfo> backNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId("com.tencent.mm:id/gr");
+            List<AccessibilityNodeInfo> backNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId(mDetalBackId);
             if (backNodeInfos == null || backNodeInfos.size() == 0) {
                 backNodeInfos = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId("com.tencent.mm:id/ft");
                 Log.e(TAG, "非最新微信版本，尝试获取ver6.3.27版本的 关闭按钮，获得按钮backNodeInfos.size：" + backNodeInfos.size());
@@ -291,10 +341,13 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
         if(rootNodeinfo == null){
             return false;
         }
-        List<AccessibilityNodeInfo> nodeinfos = rootNodeinfo.findAccessibilityNodeInfosByViewId(ID_CHAT_LISTVIEW); //获取聊天页面的ListView
+        List<AccessibilityNodeInfo> nodeinfos = rootNodeinfo.findAccessibilityNodeInfosByViewId(mListViewId); //获取聊天页面的ListView
         if (nodeinfos.isEmpty()) {
+            Log.v(TAG,"nodeinfos.isEmpty()");
             rootNodeinfo.recycle(); //记得回收
             return false;
+        } else {
+            Log.v(TAG,"mListViewId = " + mListViewId);
         }
         AccessibilityNodeInfo listviewNodeInfo = nodeinfos.get(0);
         AccessibilityNodeInfo childNodeInfo = listviewNodeInfo.getChild(listviewNodeInfo.getChildCount() - 1);
@@ -302,7 +355,7 @@ public class EnvelopeAccessibilityService extends AccessibilityService {
             rootNodeinfo.recycle();
             return false;
         }
-        List<AccessibilityNodeInfo> redpackNodeInfos = childNodeInfo.findAccessibilityNodeInfosByViewId(ID_CHAT_REDPACK_VIEW); //获取最后一个聊天消息Item里面是否有红包节点
+        List<AccessibilityNodeInfo> redpackNodeInfos = childNodeInfo.findAccessibilityNodeInfosByViewId(mRedpackViewId); //获取最后一个聊天消息Item里面是否有红包节点
         if (redpackNodeInfos.isEmpty()) { //不是红包消息
             rootNodeinfo.recycle();
             return false;

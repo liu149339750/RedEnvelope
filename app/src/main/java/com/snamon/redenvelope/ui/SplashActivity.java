@@ -3,6 +3,7 @@ package com.snamon.redenvelope.ui;
 import android.os.SystemClock;
 
 import com.snamon.redenvelope.EnvelopeGlobal;
+import com.snamon.redenvelope.MyApplication;
 import com.snamon.redenvelope.R;
 import com.snamon.redenvelope.common.util.Log;
 import com.snamon.redenvelope.widget.BaseActivity;
@@ -24,6 +25,7 @@ public class SplashActivity extends BaseActivity {
                     //初始化全局变量 ，application初始化会造成黑屏现象
                     EnvelopeGlobal.init(SplashActivity.this);
                     boolean firstAccess = EnvelopeGlobal.getSp().getFirstAccess();
+                    ((MyApplication)getApplication()).checkWeichatVersion();
                     if (!firstAccess) {
                         // TODO: 2017/1/19 snamon 这里延时2秒 可以加广告.
                         SystemClock.sleep(2000);
